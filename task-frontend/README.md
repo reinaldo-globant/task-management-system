@@ -1,105 +1,142 @@
-# Task Manager Frontend
+# Task Management Frontend
 
-A React-based frontend for the Task Management application that allows users to manage tasks across different statuses.
+This is the frontend component of the Task Management System, built with React, TypeScript, and Material UI.
 
 ## Features
 
-- User authentication (login/register)
-- Task board with drag-and-drop interface
-- Create, edit, and delete tasks
-- Filter tasks by status (To Do, In Progress, Done)
-- Responsive design for various screen sizes
+- **Authentication System**: Login and registration with JWT token management
+- **Task Board**: Kanban-style board with status columns (To Do, In Progress, Done)
+- **Task Management**: Create, view, edit, and delete tasks
+- **Side Modal**: Detailed task information in a right-side drawer with overlay
+- **Responsive Design**: Works on desktop and mobile devices
 
-## Technologies Used
+## Tech Stack
 
-- React with TypeScript
-- React Router for navigation
-- Material UI for components and styling
-- Axios for API communication
-- JWT authentication
-- Cucumber.js for BDD testing
-
-## Prerequisites
-
-- Node.js 14.x or higher
-- npm or yarn
-- Backend API running on http://localhost:8080
-
-## Getting Started
-
-1. Clone the repository
-2. Navigate to the project directory
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-4. Start the development server:
-
-```bash
-npm run dev
-```
-
-5. Open your browser and visit http://localhost:5173
+- **React 18**: UI library
+- **TypeScript**: Type-safe JavaScript
+- **Vite**: Fast development environment and build tool
+- **Material UI**: Component library for consistent design
+- **React Router**: Navigation and routing
+- **Axios**: API requests
+- **JWT Authentication**: Secure user sessions
+- **Cucumber.js**: BDD-style testing
 
 ## Project Structure
 
 ```
 src/
-├── components/       # Reusable UI components
-├── contexts/         # React contexts for state management
-├── pages/            # Page components
-├── services/         # API service functions
-├── types/            # TypeScript interfaces
-├── App.tsx           # Main application component
-└── main.tsx          # Application entry point
-
-features/
-├── authentication/                 # Authentication feature specifications
-├── task_management/                # Task management feature specifications
-└── step_definitions/               # Test implementation for feature steps
-    ├── authentication/             # Authentication test implementations
-    └── task_management/            # Task management test implementations
+├── components/             # Reusable UI components
+│   ├── Header.tsx          # App header with navigation
+│   ├── ProtectedRoute.tsx  # Route that requires authentication
+│   ├── TaskCard.tsx        # Individual task display
+│   ├── TaskColumn.tsx      # Column for organizing tasks by status
+│   └── TaskSideModal.tsx   # Side drawer for detailed task view/edit
+├── contexts/
+│   └── AuthContext.tsx     # Authentication state management
+├── pages/
+│   ├── LoginPage.tsx       # User login
+│   ├── RegisterPage.tsx    # User registration 
+│   └── TaskBoardPage.tsx   # Main task board
+├── services/
+│   ├── authService.ts      # Authentication API calls
+│   └── taskService.ts      # Task management API calls
+├── types/
+│   └── index.ts            # TypeScript type definitions
+├── App.tsx                 # Main application component
+└── main.tsx               # Application entry point
 ```
 
-## Communication with Backend
+## Getting Started
 
-The frontend communicates with the Spring Boot backend using RESTful API endpoints:
+### Prerequisites
 
-- Authentication: `/api/auth/*`
-- Task Management: `/api/tasks/*`
+- Node.js 16 or higher
+- npm 8 or higher
 
-See the backend README for detailed API documentation.
-
-## Testing
-
-The application includes Behavior-Driven Development (BDD) tests written in Gherkin format. These tests describe the expected behavior of the application from a user's perspective.
-
-To run the tests, first install the required dependencies:
+### Installation
 
 ```bash
-npm install --save-dev @cucumber/cucumber @cucumber/pretty-formatter jest @testing-library/react @testing-library/jest-dom @testing-library/user-event
+# Install dependencies
+npm install
 ```
 
-Then run the tests with:
+### Development
 
 ```bash
-npm test
+# Start development server
+npm run dev
 ```
 
-The test suite covers:
+The application will be available at `http://localhost:5173`.
 
-- Authentication (register, login, logout)
-- Task creation, updating, and deletion
-- Task filtering and display by status
+### Environment Variables
 
-## Building for Production
+Create a `.env` file in the project root with the following variables:
 
-To build the application for production, run:
+```
+VITE_API_URL=http://localhost:8080/api
+```
+
+For Docker deployment, there's a separate `.env.docker` file which is used automatically.
+
+## Build
 
 ```bash
+# Type check
+npm run typecheck
+
+# Production build
 npm run build
 ```
 
-The build artifacts will be stored in the `dist/` directory.
+The build artifacts will be in the `dist` directory.
+
+## Testing
+
+The frontend includes both unit tests and feature tests using Cucumber.js for BDD-style testing.
+
+```bash
+# Run unit tests
+npm test
+
+# Run feature tests
+npm run test:e2e
+```
+
+### Feature Tests
+
+Feature tests are located in the `features` directory and describe user scenarios in Gherkin syntax. They cover:
+
+- User authentication (login, register)
+- Task management (create, update, delete tasks)
+- Task board interactions
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Create production build
+- `npm run typecheck` - Run TypeScript type checking
+- `npm test` - Run unit tests
+- `npm run test:e2e` - Run feature tests
+- `npm run lint` - Run linting
+- `npm run preview` - Preview production build locally
+
+## Docker
+
+The frontend can be built and run in a Docker container:
+
+```bash
+# Build the image
+docker build -t task-frontend .
+
+# Run the container
+docker run -p 80:80 task-frontend
+```
+
+## Design Decisions
+
+- **JWT Authentication**: Stored in localStorage for persistent sessions
+- **Material UI**: Used for consistent design and responsive components
+- **Context API**: Used for state management instead of Redux for simplicity
+- **TypeScript**: Used throughout for type safety and better developer experience
+- **Side Modal**: Implemented as a drawer component for better mobile UX
