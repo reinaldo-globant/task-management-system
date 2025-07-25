@@ -19,7 +19,7 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    name: ''
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ const RegisterPage = () => {
         formData.username,
         formData.email,
         formData.password,
-        formData.fullName
+        formData.name
       );
       setSuccess(true);
       setTimeout(() => {
@@ -93,9 +93,9 @@ const RegisterPage = () => {
                 fullWidth
                 id="fullName"
                 label="Full Name"
-                name="fullName"
+                name="name"
                 autoComplete="name"
-                value={formData.fullName}
+                value={formData.name}
                 onChange={handleChange}
               />
               <TextField
