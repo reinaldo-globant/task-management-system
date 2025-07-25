@@ -1,39 +1,29 @@
-# Task Management Backend
+# Task Service
 
-This is the backend API for the Task Management System, built with Spring Boot.
+Task management microservice for the Task Management System.
 
 ## Features
 
 - **RESTful API**: Clean API design following REST principles
-- **JWT Authentication**: Secure authentication and authorization
 - **Task Management**: Full CRUD operations for tasks
-- **User Management**: User registration and authentication
+- **JWT Authentication**: Secure API access through token validation
+- **User Context**: Tasks are associated with authenticated users
+- **Status Management**: Tasks can be in different states (TODO, IN_PROGRESS, DONE)
 - **Data Validation**: Request validation and error handling
 - **Cross-Origin Resource Sharing (CORS)**: Configured for frontend access
+- **PostgreSQL Database**: Persistent storage for task data
 
 ## Tech Stack
 
 - **Spring Boot 3.x**: Application framework
 - **Spring Security**: Authentication and authorization
 - **Spring Data JPA**: Data access
-- **JWT**: JSON Web Token implementation
-- **H2 Database**: In-memory database (can be replaced with MySQL, PostgreSQL, etc.)
+- **Spring WebFlux WebClient**: Communication with User Service
+- **PostgreSQL**: Relational database for persistent storage
 - **Maven**: Dependency management and build
 - **Java 17**: Programming language
 
 ## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - Register a new user
-  - Request: `{ "username": "user", "password": "password", "email": "user@example.com", "name": "User Name" }`
-  - Response: `{ "id": 1, "username": "user", "email": "user@example.com", "name": "User Name" }`
-
-- `POST /api/auth/login` - Authenticate and receive JWT token
-  - Request: `{ "username": "user", "password": "password" }`
-  - Response: `{ "token": "JWT_TOKEN", "type": "Bearer", "id": 1, "username": "user", "email": "user@example.com", "name": "User Name" }`
-
-### Tasks
 
 - `GET /api/tasks` - Get all tasks (admin only)
   - Response: `[{ "id": 1, "title": "Task title", "description": "Task description", "status": "TODO", "ownerId": 1, "createdAt": "2023-01-01T12:00:00", "updatedAt": "2023-01-01T12:00:00" }, ...]`
@@ -64,85 +54,65 @@ This is the backend API for the Task Management System, built with Spring Boot.
 
 - Java 17 or higher
 - Maven 3.8 or higher
+- PostgreSQL 14 or higher
+- User Service running on port 8081
 
-### Installation
+### Configuration
 
-```bash
-# Clone the repository
-git clone https://github.com/reinaldo-globant/task-management-system.git
-cd task-management-system/task-backend
+Configuration is done through `application.properties`. Key configurations include:
 
-# Build the project
-./mvnw clean install
-```
+- **Database Configuration**: Connection settings for PostgreSQL
+- **User Service Configuration**: URL for the User Service
+- **Server Port**: Set to 8080 by default
 
 ### Running Locally
 
 ```bash
-# Run the application
+# Build the project
+./mvnw clean install
+
+# Run the service
 ./mvnw spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080/api`.
+The service will be available at `http://localhost:8080`.
 
-## Configuration
-
-Configuration is done through `application.properties` (or `application.yml`). Key configurations include:
-
-- **Database Configuration**: Connection settings for the database
-- **JWT Configuration**: Secret key and token expiration
-- **CORS Configuration**: Allowed origins for cross-origin requests
-- **Logging**: Logging levels and output
-
-## Testing
-
-```bash
-# Run tests
-./mvnw test
-```
-
-## Building for Production
-
-```bash
-# Package the application
-./mvnw clean package
-```
-
-This creates a standalone JAR file in the `target` directory.
-
-## Running with Docker
+### Running with Docker
 
 ```bash
 # Build Docker image
-docker build -t task-backend .
+docker build -t task-service .
 
 # Run Docker container
-docker run -p 8080:8080 task-backend
+docker run -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5433/taskdb \
+  -e USER_SERVICE_URL=http://host.docker.internal:8081 \
+  task-service
 ```
 
 ## Security
 
-- All endpoints (except authentication) require a valid JWT token
-- Passwords are hashed using BCrypt
-- Role-based access control for administrative endpoints
+- All endpoints require a valid JWT token (validated through the User Service)
+- Users can only access their own tasks
+- Admin users can access all tasks
+
+## Docker Compose
+
+This service is part of a larger microservices architecture and can be run using the docker-compose.yml file in the parent directory.
+
+```bash
+# From the parent directory
+docker-compose up
+```
 
 ## Data Model
-
-The main entities in the system are:
-
-### User
-- id: Long
-- username: String
-- password: String (hashed)
-- email: String
-- name: String
-- roles: Set<Role>
 
 ### Task
 - id: Long
 - title: String
 - description: String
-- status: Enum (TODO, IN_PROGRESS, DONE)
-- owner: User
+- status: String (TODO, IN_PROGRESS, DONE)
+- ownerId: Long
+- ownerName: String
 - createdAt: LocalDateTime
 - updatedAt: LocalDateTime

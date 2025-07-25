@@ -1,32 +1,91 @@
 version: '3.8'
 
 services:
-  task-backend:
-    build:
-      context: ./task-backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+  # User Service PostgreSQL Database
+  user-db:
+    image: postgres:14
+    container_name: user-db
+    restart: always
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    container_name: task-backend
-    restart: unless-stopped
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
     networks:
       - task-network
 
+  # Task Service PostgreSQL Database  
+  task-db:
+    image: postgres:14
+    container_name: task-db
+    restart: always
+    environment:
+      POSTGRES_DB: taskdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - task-db-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+
+  # User Service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/userdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "8081:8081"
+    depends_on:
+      - user-db
+    networks:
+      - task-network
+
+  # Task Service (previously task-backend)
+  task-service:
+    build: ./task-backend
+    container_name: task-service
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://task-db:5432/taskdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - USER_SERVICE_URL=http://user-service:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - task-db
+      - user-service
+    networks:
+      - task-network
+
+  # Frontend Application
   task-frontend:
-    build:
-      context: ./task-frontend
-      dockerfile: Dockerfile
+    build: ./task-frontend
+    container_name: task-frontend
+    restart: always
     ports:
       - "80:80"
     depends_on:
-      - task-backend
-    container_name: task-frontend
-    restart: unless-stopped
+      - user-service
+      - task-service
     networks:
       - task-network
 
 networks:
   task-network:
     driver: bridge
+
+volumes:
+  user-db-data:
+  task-db-data:
