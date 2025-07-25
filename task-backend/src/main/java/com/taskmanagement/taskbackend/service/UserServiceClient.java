@@ -27,9 +27,9 @@ public class UserServiceClient {
                     .uri(validationEndpoint)
                     .header("Authorization", "Bearer " + token)
                     .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError, response -> 
+                    .onStatus(status -> status.is4xxClientError(), response -> 
                         Mono.error(new RuntimeException("Invalid token")))
-                    .onStatus(HttpStatus::is5xxServerError, response -> 
+                    .onStatus(status -> status.is5xxServerError(), response -> 
                         Mono.error(new RuntimeException("User service unavailable")))
                     .bodyToMono(String.class)
                     .map(response -> true)
