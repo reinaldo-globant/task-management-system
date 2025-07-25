@@ -16,7 +16,7 @@ const Header = () => {
         {isAuthenticated ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
-              Welcome, {user?.fullName || user?.username}
+              Welcome, {user?.name || user?.username}
             </Typography>
             <Button color="inherit" onClick={logout}>
               Logout

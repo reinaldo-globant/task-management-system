@@ -9,13 +9,13 @@ public class JwtResponse {
     private Long id;
     private String username;
     private String email;
-    private String fullName;
+    private String name;
 
-    public JwtResponse(String accessToken, Long id, String username, String email, String fullName) {
+    public JwtResponse(String accessToken, Long id, String username, String email, String name) {
         this.token = accessToken;
         this.id = id;
         this.username = username;
         this.email = email;
-        this.fullName = fullName;
+        this.name = name;
     }
 }

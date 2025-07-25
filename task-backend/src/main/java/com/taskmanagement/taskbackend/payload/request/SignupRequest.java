@@ -22,5 +22,5 @@ public class SignupRequest {
 
     @NotBlank
     @Size(max = 100)
-    private String fullName;
+    private String name;
 }

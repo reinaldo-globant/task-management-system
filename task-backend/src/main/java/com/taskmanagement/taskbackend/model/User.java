@@ -35,18 +35,18 @@ public class User {
 
     @NotBlank
     @Size(max = 100)
-    private String fullName;
+    private String name;
 
     // Default constructor
     public User() {
     }
 
     // Constructor with fields
-    public User(String username, String email, String password, String fullName) {
+    public User(String username, String email, String password, String name) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.fullName = fullName;
+        this.name = name;
     }
 
     // Getters and Setters
@@ -83,10 +83,10 @@ public class User {
     }
 
     public String getFullName() {
-        return fullName;
+        return name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFullName(String name) {
+        this.name = name;
     }
 }

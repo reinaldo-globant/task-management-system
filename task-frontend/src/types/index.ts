@@ -2,7 +2,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  fullName: string;
+  name: string;
 }
 
 export interface LoginResponse {
@@ -11,12 +11,12 @@ export interface LoginResponse {
   id: number;
   username: string;
   email: string;
-  fullName: string;
+  name: string;
 }
 
 export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
-  fullName: string;
+  name: string;
 }

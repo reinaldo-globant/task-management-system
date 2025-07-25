@@ -3,12 +3,12 @@ import axios from 'axios';
 const API_URL = '/api/auth';
 
 interface LoginResponse {
+  name: string;
   accessToken: string;
   tokenType: string;
   id: number;
   username: string;
-  email: string;
-  fullName: string;
+  email: string;  
 }
 
 const login = async (username: string, password: string): Promise<LoginResponse> => {
@@ -24,7 +24,7 @@ const register = async (username: string, email: string, password: string, fullN
     username,
     email,
     password,
-    fullName
+    name:fullName
   });
   return response.data;
 };

@@ -91,7 +91,7 @@ const RegisterPage = () => {
               <TextField
                 required
                 fullWidth
-                id="fullName"
+                id="name"
                 label="Full Name"
                 name="name"
                 autoComplete="name"

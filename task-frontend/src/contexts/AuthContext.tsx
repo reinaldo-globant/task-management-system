@@ -6,14 +6,14 @@ interface User {
   id: number;
   username: string;
   email: string;
-  fullName: string;
+  name: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, fullName: string) => Promise<void>;
+  register: (username: string, email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           id: decoded.id,
           username: decoded.sub,
           email: decoded.email,
-          fullName: decoded.fullName || ''
+          name: decoded.name || ''
         };
         
         setUser(userData);
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         id: data.id,
         username: data.username,
         email: data.email,
-        fullName: data.fullName
+        name: data.name
       });
       
       setIsAuthenticated(true);
@@ -84,9 +84,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string, fullName: string) => {
+  const register = async (username: string, email: string, password: string, name: string) => {
     try {
-      await authService.register(username, email, password, fullName);
+      await authService.register(username, email, password, name);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
