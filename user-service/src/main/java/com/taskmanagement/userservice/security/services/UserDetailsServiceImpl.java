@@ -17,6 +17,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("🔧 UserDetailsService: loadUserByUsername called with: '" + username + "'");
+        
+        // Handle service authentication principals - these are NOT real users in the database
+        if ("SERVICE_AUTHENTICATED".equals(username)) {
+            System.out.println("✅ UserDetailsService: HANDLING service principal, skipping DB lookup");
+            // Return a dummy UserDetails for service authentication
+            // This won't be used for actual authorization, just to satisfy Spring Security
+            return org.springframework.security.core.userdetails.User.builder()
+                    .username(username)
+                    .password("") // No password needed for service auth
+                    .authorities("ROLE_SERVICE")
+                    .build();
+        }
+        
+        // Handle real user authentication - lookup in database
+        System.out.println("👤 UserDetailsService: Looking up REAL user in database: " + username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 

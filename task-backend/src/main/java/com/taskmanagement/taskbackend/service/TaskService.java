@@ -2,7 +2,7 @@ package com.taskmanagement.taskbackend.service;
 
 import com.taskmanagement.taskbackend.model.Task;
 import com.taskmanagement.taskbackend.model.TaskStatus;
-import com.taskmanagement.taskbackend.model.User;
+import com.taskmanagement.taskbackend.payload.request.TaskRequest;
 import com.taskmanagement.taskbackend.repository.StatusChangeRepository;
 import com.taskmanagement.taskbackend.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,13 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final StatusChangeRepository statusChangeRepository;
+    private final InternalUserServiceClient internalUserServiceClient;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, StatusChangeRepository statusChangeRepository) {
+    public TaskService(TaskRepository taskRepository, StatusChangeRepository statusChangeRepository, InternalUserServiceClient internalUserServiceClient) {
         this.taskRepository = taskRepository;
         this.statusChangeRepository = statusChangeRepository;
+        this.internalUserServiceClient = internalUserServiceClient;
     }
 
     public List<Task> getAllTasks() {
@@ -36,12 +38,30 @@ public class TaskService {
         return taskRepository.findByStatus(status);
     }
 
-    public List<Task> getTasksByOwnerId(Long ownerId) {
-        return taskRepository.findByOwnerId(ownerId);
+    public List<Task> getTasksByOwnerUsername(String ownerUsername) {
+        return taskRepository.findByOwner(ownerUsername);
     }
 
-    public List<Task> getTasksByStatusAndOwnerId(TaskStatus status, Long ownerId) {
-        return taskRepository.findByStatusAndOwnerId(status, ownerId);
+    public List<Task> getTasksByStatusAndOwnerUsername(TaskStatus status, String ownerUsername) {
+        return taskRepository.findByStatusAndOwner(status, ownerUsername);
+    }
+
+    @Transactional
+    public Task createTask(TaskRequest taskRequest, String currentUser) {
+        // Lookup the user ID using internal service
+        Long userId = internalUserServiceClient.getUserIdByUsername(currentUser).block();
+        if (userId == null) {
+            throw new RuntimeException("User not found: " + currentUser);
+        }
+        
+        Task task = new Task(
+                taskRequest.getTitle(),
+                taskRequest.getDescription(),
+                taskRequest.getStatus(),
+                userId,
+                currentUser
+        );
+        return taskRepository.save(task);
     }
 
     @Transactional

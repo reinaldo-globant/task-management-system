@@ -38,5 +38,19 @@ public class UserController {
         }
     }
     
+    @GetMapping("/username/{username}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            // Don't return the password
+            User userResponse = user.get();
+            userResponse.setPassword("");
+            return ResponseEntity.ok(userResponse);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     // Token validation has been moved to TokenValidationController
 }

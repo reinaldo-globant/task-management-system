@@ -1,15 +1,13 @@
 package com.taskmanagement.taskbackend.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -36,9 +34,13 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
     
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @NotNull
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
+    
+    @NotBlank
+    @Column(name = "owner_username", nullable = false)
+    private String owner;
     
     @NotNull
     private LocalDateTime createdAt;
@@ -54,17 +56,18 @@ public class Task {
     }
 
     // Constructor with fields
-    public Task(String title, String description, TaskStatus status, User owner) {
+    public Task(String title, String description, TaskStatus status, Long ownerId, String owner) {
         this.title = title;
         this.description = description;
         this.status = status;
+        this.ownerId = ownerId;
         this.owner = owner;
         this.createdAt = LocalDateTime.now();
     }
     
     // Method to add status change
-    public void addStatusChange(TaskStatus previousStatus, TaskStatus newStatus, User changedBy) {
-        StatusChange statusChange = new StatusChange(this, previousStatus, newStatus, changedBy);
+    public void addStatusChange(TaskStatus previousStatus, TaskStatus newStatus, Long changedByUserId, String changedByUsername) {
+        StatusChange statusChange = new StatusChange(this, previousStatus, newStatus, changedByUserId, changedByUsername);
         this.statusChanges.add(statusChange);
         this.updatedAt = LocalDateTime.now();
     }
@@ -98,19 +101,32 @@ public class Task {
         return status;
     }
 
-    public void setStatus(TaskStatus status, User changedBy) {
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    public void setStatus(TaskStatus status, Long changedByUserId, String changedByUsername) {
         if (this.status != null && !this.status.equals(status)) {
-            addStatusChange(this.status, status, changedBy);
+            addStatusChange(this.status, status, changedByUserId, changedByUsername);
         }
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User getOwner() {
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
     

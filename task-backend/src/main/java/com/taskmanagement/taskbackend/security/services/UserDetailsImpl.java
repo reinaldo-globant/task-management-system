@@ -1,7 +1,7 @@
 package com.taskmanagement.taskbackend.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.taskmanagement.taskbackend.model.User;
+import com.taskmanagement.taskbackend.dto.UserResponseDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,15 +37,15 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
 
-    public static UserDetailsImpl build(User user) {
+    public static UserDetailsImpl build(UserResponseDto user) {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getFullName(),
-                user.getPassword(),
+                user.getName(),
+                "", // No password for external users
                 authorities);
     }
 

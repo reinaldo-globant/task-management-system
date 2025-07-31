@@ -4,12 +4,13 @@ const API_URL = '/api/auth';
 
 interface LoginResponse {
   name: string;
-  accessToken: string;
+  token: string;
   tokenType: string;
   id: number;
   username: string;
   email: string;  
 }
+
 
 const login = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await axios.post(`${API_URL}/signin`, {
@@ -19,12 +20,12 @@ const login = async (username: string, password: string): Promise<LoginResponse>
   return response.data;
 };
 
-const register = async (username: string, email: string, password: string, fullName: string): Promise<any> => {
+const register = async (username: string, email: string, password: string, name: string): Promise<any> => {
   const response = await axios.post(`${API_URL}/signup`, {
     username,
     email,
     password,
-    name:fullName
+    name:name
   });
   return response.data;
 };

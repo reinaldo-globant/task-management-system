@@ -1,6 +1,6 @@
 package com.taskmanagement.taskbackend.security;
 
-import com.taskmanagement.taskbackend.service.UserServiceClient;
+import com.taskmanagement.taskbackend.grpc.UserServiceGrpcClient;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,27 +21,42 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private UserServiceClient userServiceClient;
+    private UserServiceGrpcClient userServiceGrpcClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        System.out.println("=== JWT Filter Processing Request ===");
+        System.out.println("Request URL: " + request.getRequestURL());
+        System.out.println("Request Method: " + request.getMethod());
+        System.out.println("Request URI: " + request.getRequestURI());
+        
         try {
             String jwt = parseJwt(request);
+            System.out.println("JWT token extracted: " + (jwt != null ? "present" : "absent"));
             
-            if (jwt != null && userServiceClient.validateToken(jwt)) {
-                // Create authentication with basic role
-                UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(
-                        "user", null, 
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+            if (jwt != null) {
+                System.out.println("Validating token with user service via gRPC...");
+                String username = userServiceGrpcClient.validateTokenAndGetUsername(jwt);
+                System.out.println("Username from gRPC token validation: " + username);
                 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (username != null) {
+                    UsernamePasswordAuthenticationToken authentication = 
+                        new UsernamePasswordAuthenticationToken(
+                            username, null, 
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+                    
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Authentication set for user: " + username);
+                } else {
+                    System.out.println("Token validation failed - username is null");
+                }
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+            System.out.println("Cannot set user authentication: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

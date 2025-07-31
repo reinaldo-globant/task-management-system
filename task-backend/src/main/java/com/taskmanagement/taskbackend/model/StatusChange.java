@@ -1,5 +1,6 @@
 package com.taskmanagement.taskbackend.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,21 +38,25 @@ public class StatusChange {
     @NotNull
     private LocalDateTime changeDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "changed_by_user_id")
-    private User changedBy;
+
+    @Column(name = "changed_by_user_id")
+    private Long changedByUserId;
+    
+    @Column(name = "changed_by_username")
+    private String changedByUsername;
 
     // Default constructor
     public StatusChange() {
     }
 
     // Constructor with fields
-    public StatusChange(Task task, TaskStatus previousStatus, TaskStatus newStatus, User changedBy) {
+    public StatusChange(Task task, TaskStatus previousStatus, TaskStatus newStatus, Long changedByUserId, String changedByUsername) {
         this.task = task;
         this.previousStatus = previousStatus;
         this.newStatus = newStatus;
         this.changeDate = LocalDateTime.now();
-        this.changedBy = changedBy;
+        this.changedByUserId = changedByUserId;
+        this.changedByUsername = changedByUsername;
     }
 
     // Getters and Setters
@@ -95,11 +100,19 @@ public class StatusChange {
         this.changeDate = changeDate;
     }
 
-    public User getChangedBy() {
-        return changedBy;
+    public Long getChangedByUserId() {
+        return changedByUserId;
     }
 
-    public void setChangedBy(User changedBy) {
-        this.changedBy = changedBy;
+    public void setChangedByUserId(Long changedByUserId) {
+        this.changedByUserId = changedByUserId;
+    }
+    
+    public String getChangedByUsername() {
+        return changedByUsername;
+    }
+
+    public void setChangedByUsername(String changedByUsername) {
+        this.changedByUsername = changedByUsername;
     }
 }

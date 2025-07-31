@@ -2,11 +2,8 @@ package com.taskmanagement.taskbackend.controller;
 
 import com.taskmanagement.taskbackend.model.Task;
 import com.taskmanagement.taskbackend.model.TaskStatus;
-import com.taskmanagement.taskbackend.model.User;
 import com.taskmanagement.taskbackend.payload.request.TaskRequest;
-import com.taskmanagement.taskbackend.security.services.UserDetailsImpl;
 import com.taskmanagement.taskbackend.service.TaskService;
-import com.taskmanagement.taskbackend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,19 +30,15 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final UserService userService;
 
     @Autowired
-    public TaskController(TaskService taskService, UserService userService) {
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.userService = userService;
     }
     
-    private User getCurrentUser() {
+    private String getCurrentUserName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return userService.getUserById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return (String)authentication.getPrincipal();       
     }
 
     @Operation(summary = "Get all tasks", description = "Retrieves a list of all tasks regardless of status or owner")
@@ -83,31 +76,31 @@ public class TaskController {
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
-    @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<Task>> getTasksByOwner(@PathVariable Long ownerId) {
-        List<Task> tasks = taskService.getTasksByOwnerId(ownerId);
+    @GetMapping("/owner/{ownerUsername}")
+    public ResponseEntity<List<Task>> getTasksByOwner(@PathVariable String ownerUsername) {
+        List<Task> tasks = taskService.getTasksByOwnerUsername(ownerUsername);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
     
     @GetMapping("/my-tasks")
     public ResponseEntity<List<Task>> getMyTasks() {
-        User currentUser = getCurrentUser();
-        List<Task> tasks = taskService.getTasksByOwnerId(currentUser.getId());
+        String currentUsername = getCurrentUserName();
+        List<Task> tasks = taskService.getTasksByOwnerUsername(currentUsername);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
-    @GetMapping("/status/{status}/owner/{ownerId}")
+    @GetMapping("/status/{status}/owner/{ownerUsername}")
     public ResponseEntity<List<Task>> getTasksByStatusAndOwner(
             @PathVariable TaskStatus status,
-            @PathVariable Long ownerId) {
-        List<Task> tasks = taskService.getTasksByStatusAndOwnerId(status, ownerId);
+            @PathVariable String ownerUsername) {
+        List<Task> tasks = taskService.getTasksByStatusAndOwnerUsername(status, ownerUsername);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
     
     @GetMapping("/my-tasks/status/{status}")
     public ResponseEntity<List<Task>> getMyTasksByStatus(@PathVariable TaskStatus status) {
-        User currentUser = getCurrentUser();
-        List<Task> tasks = taskService.getTasksByStatusAndOwnerId(status, currentUser.getId());
+        String currentUsername = getCurrentUserName();
+        List<Task> tasks = taskService.getTasksByStatusAndOwnerUsername(status, currentUsername);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
@@ -123,14 +116,8 @@ public class TaskController {
     public ResponseEntity<Task> createTask(
             @Parameter(description = "Task object to be created", required = true)
             @Valid @RequestBody TaskRequest taskRequest) {
-        User currentUser = getCurrentUser();
-        Task task = new Task(
-                taskRequest.getTitle(),
-                taskRequest.getDescription(),
-                taskRequest.getStatus(),
-                currentUser
-        );
-        Task createdTask = taskService.createTask(task);
+        String currentUser = getCurrentUserName();
+        Task createdTask = taskService.createTask(taskRequest, currentUser);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
@@ -151,18 +138,18 @@ public class TaskController {
             @Parameter(description = "Updated task information", required = true)
             @Valid @RequestBody TaskRequest taskRequest) {
         
-        User currentUser = getCurrentUser();
+        String currentUsername = getCurrentUserName();
         
         return taskService.getTaskById(id)
                 .map(existingTask -> {
                     // Check if the user is the owner of the task
-                    if (!existingTask.getOwner().getId().equals(currentUser.getId())) {
+                    if (!existingTask.getOwner().equals(currentUsername)) {
                         return new ResponseEntity<Task>(HttpStatus.FORBIDDEN);
                     }
                     
                     existingTask.setTitle(taskRequest.getTitle());
                     existingTask.setDescription(taskRequest.getDescription());
-                    existingTask.setStatus(taskRequest.getStatus(), currentUser);
+                    existingTask.setStatus(taskRequest.getStatus());
                     
                     Task updatedTask = taskService.saveTask(existingTask);
                     return new ResponseEntity<>(updatedTask, HttpStatus.OK);
@@ -181,12 +168,12 @@ public class TaskController {
             @Parameter(description = "ID of the task to be deleted", required = true)
             @PathVariable Long id) {
         
-        User currentUser = getCurrentUser();
+        String currentUsername = getCurrentUserName();
         
         return taskService.getTaskById(id)
                 .map(existingTask -> {
                     // Check if the user is the owner of the task
-                    if (!existingTask.getOwner().getId().equals(currentUser.getId())) {
+                    if (!existingTask.getOwner().equals(currentUsername)) {
                         return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
                     }
                     

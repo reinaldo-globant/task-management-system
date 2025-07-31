@@ -43,8 +43,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=myVeryLongAndSecureJWTSecretKeyWithAtLeast256BitsForSecurityPurposes123456789
+      - SERVICE_TOKEN=mySecureServiceToken123ForInterServiceCommunication
+      
     ports:
       - "8081:8081"
+      - "9090:9090"
     depends_on:
       - user-db
     networks:
@@ -61,6 +65,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - USER_SERVICE_URL=http://user-service:8081
+      - GRPC_USER_SERVICE_ADDRESS=static://user-service:9090
+      - JWT_SECRET=myVeryLongAndSecureJWTSecretKeyWithAtLeast256BitsForSecurityPurposes123456789
+      - SERVICE_TOKEN=mySecureServiceToken123ForInterServiceCommunication
+      
     ports:
       - "8080:8080"
     depends_on:

@@ -31,7 +31,7 @@ public class TokenValidationController {
                 // Get username from token and verify the user exists
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 if (userRepository.findByUsername(username).isPresent()) {
-                    return ResponseEntity.ok(new MessageResponse("Token is valid"));
+                    return ResponseEntity.ok().body(username);
                 }
             }
             return ResponseEntity.status(401).body(new MessageResponse("Invalid token"));
