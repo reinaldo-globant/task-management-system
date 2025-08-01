@@ -7,6 +7,7 @@ A full-stack task management application with a microservices architecture.
 This task management system provides a modern, responsive interface for organizing tasks across different status columns (To Do, In Progress, Done). It features:
 
 - **User Authentication**: Secure login and registration system using JWT tokens
+- **Single Sign-On (SSO)**: OAuth2 integration with Google, GitHub, and Microsoft
 - **Task Board**: Visual Kanban-style board with status columns
 - **Task Management**: Create, read, update, and delete tasks
 - **Side Modal**: Detailed task view and editing through a slide-in panel
@@ -145,15 +146,50 @@ npm run dev
 
 The frontend development server will be available at `http://localhost:5173`.
 
+## Single Sign-On (SSO) Setup
+
+This application includes OAuth2 integration for seamless authentication with popular providers:
+
+- **Google OAuth2** - Sign in with Google accounts
+- **GitHub OAuth2** - Sign in with GitHub accounts  
+- **Microsoft OAuth2** - Sign in with Microsoft/Azure AD accounts
+
+### Quick Start (No Configuration Required)
+
+The SSO integration is **ready to use** out of the box:
+
+1. Start the application: `docker-compose up`
+2. Navigate to: `http://localhost:5173/login`
+3. You'll see OAuth2 section with status message
+4. **For full OAuth2 functionality**: Follow the [SSO Setup Guide](SSO_SETUP.md)
+
+### Features
+
+- ✅ **Dynamic Provider Detection** - Only shows configured providers
+- ✅ **Account Linking** - Links OAuth2 accounts via email matching
+- ✅ **JWT Integration** - OAuth2 users get same JWT tokens as regular users
+- ✅ **Security** - Follows OAuth2 best practices and CORS configuration
+- ✅ **Production Ready** - Includes environment configuration and deployment guides
+
+For detailed OAuth2 configuration instructions, see [SSO_SETUP.md](SSO_SETUP.md).
+
 ## API Documentation
 
 ### User Service API
 
+#### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Authenticate and receive JWT token
+- `POST /api/users/validate` - Validate a JWT token
+
+#### OAuth2 SSO
+- `GET /api/oauth2/providers` - Get available OAuth2 providers
+- `GET /oauth2/authorization/{provider}` - Initiate OAuth2 login (Google, GitHub, Microsoft)
+- `GET /oauth2/redirect` - Handle OAuth2 callback
+
+#### User Management
 - `GET /api/users` - Get all users (admin only)
 - `GET /api/users/{id}` - Get user by ID
-- `POST /api/users/validate` - Validate a JWT token
 
 ### Task Service API
 
