@@ -8,9 +8,11 @@ import {
   Button, 
   Box, 
   Alert, 
-  CircularProgress 
+  CircularProgress,
+  Divider
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import OAuth2LoginButtons from '../components/OAuth2LoginButtons';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -84,8 +86,18 @@ const LoginPage = () => {
             >
               {loading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
+
+            <Box sx={{ my: 2 }}>
+              <Divider>
+                <Typography variant="body2" color="text.secondary">
+                  OR
+                </Typography>
+              </Divider>
+            </Box>
+
+            <OAuth2LoginButtons />
             
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
               <Typography variant="body2">
                 Don't have an account?{' '}
                 <Link to="/register" style={{ textDecoration: 'none' }}>

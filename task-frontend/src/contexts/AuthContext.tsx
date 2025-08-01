@@ -13,11 +13,12 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginWithToken: (username: string, token: string) => void;
   register: (username: string, email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -93,6 +94,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const loginWithToken = (username: string, token: string) => {
+    try {
+      localStorage.setItem('token', token);
+      
+      const decoded: any = jwtDecode(token);
+      const userData = {
+        id: decoded.id,
+        username: username,
+        email: decoded.email || '',
+        name: decoded.name || username
+      };
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Error processing OAuth2 token:', error);
+      logout();
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -100,7 +121,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, loginWithToken, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

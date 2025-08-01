@@ -9,9 +9,11 @@ import {
   Box, 
   Alert, 
   CircularProgress,
-  Stack
+  Stack,
+  Divider
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import OAuth2LoginButtons from '../components/OAuth2LoginButtons';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -150,8 +152,18 @@ const RegisterPage = () => {
             >
               {loading ? <CircularProgress size={24} /> : 'Register'}
             </Button>
+
+            <Box sx={{ my: 2 }}>
+              <Divider>
+                <Typography variant="body2" color="text.secondary">
+                  OR
+                </Typography>
+              </Divider>
+            </Box>
+
+            <OAuth2LoginButtons />
             
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
               <Typography variant="body2">
                 Already have an account?{' '}
                 <Link to="/login" style={{ textDecoration: 'none' }}>

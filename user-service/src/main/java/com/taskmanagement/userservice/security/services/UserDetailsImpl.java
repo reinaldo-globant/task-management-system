@@ -5,13 +5,15 @@ import com.taskmanagement.userservice.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class UserDetailsImpl implements UserDetails {
+public class UserDetailsImpl implements UserDetails, OAuth2User {
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -23,6 +25,7 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
+    private Map<String, Object> attributes;
 
     public UserDetailsImpl(Long id, String username, String email, String name, String password,
                            Collection<? extends GrantedAuthority> authorities) {
@@ -32,6 +35,17 @@ public class UserDetailsImpl implements UserDetails {
         this.name = name;
         this.password = password;
         this.authorities = authorities;
+    }
+
+    public UserDetailsImpl(Long id, String username, String email, String name, String password,
+                           Collection<? extends GrantedAuthority> authorities, Map<String, Object> attributes) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.authorities = authorities;
+        this.attributes = attributes;
     }
 
     public static UserDetailsImpl build(User user) {
@@ -46,6 +60,21 @@ public class UserDetailsImpl implements UserDetails {
                 user.getName(),
                 user.getPassword(),
                 authorities);
+    }
+
+    public static UserDetailsImpl create(User user, Map<String, Object> attributes) {
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .collect(Collectors.toList());
+
+        return new UserDetailsImpl(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getName(),
+                user.getPassword(),
+                authorities,
+                attributes);
     }
 
     @Override
@@ -93,6 +122,12 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    // OAuth2User interface methods
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
     @Override

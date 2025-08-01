@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TaskBoardPage from './pages/TaskBoardPage';
 import Header from './components/Header';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 import { useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -29,6 +30,7 @@ function App() {
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/tasks" />} />
         <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/tasks" />} />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
         <Route 
           path="/tasks" 
           element={
